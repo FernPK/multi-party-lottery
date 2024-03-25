@@ -1,18 +1,21 @@
 # multi-party-lottery
 เกม lottery ที่สามารถเล่นได้หลายคนด้วยเงินเดิมพันคนละ 0.001 ether
 
+[link to contract and transactions](https://sepolia.etherscan.io/address/0xb7bd661f6e80aebd892c5112e016de258698c5b6)
+
+
+
 ## วิธีการเล่น
 1. Stage 1: ผู้เล่นที่ต้องการเล่นเรียกฟังก์ชัน joinAndCommit 
     - พร้อมส่ง 0.001 ether มายัง contract
-    - เลือก random number ใส่ใน _commit (range 0 - 999)
-    - ใส่ค่า _salt ตามความต้องการของผู้เล่น เป็นเหมือน password ตัวช่วยในการปกปิด random number ที่เลือก ผู้เล่นจะต้องจำ _salt ไว้ใช้เปิดเผย random number
+    - ใส่ค่า _commitHash ที่ได้จากการเรียกใช้ฟังก์ชัน getHash โดยใส่ random number ที่ _commit และใส่ _salt ตามความต้องการของผู้เล่น เป็นเหมือน password ตัวช่วยในการปกปิด random number ที่เลือก ผู้เล่นจะต้องจำ _salt ไว้ใช้เปิดเผย random number
   
     <i style="color:gray">เมื่อผ่านไป T1 วินาทีหลังจากมีผู้เล่นคนแรก ผู้เล่นคนอื่นจะไม่สามารถเข้าร่วมได้อีก และเกมจะเข้าสู่ Stage 2</i> 
     
     <i style="color:gray">จำนวนผู้เล่นสูงสุดคือ maxNumPlayer กำหนดโดยเจ้าของ contract</i> 
 
 2. Stage 2: ผู้เล่นทำการเปิดเผย random number ที่ commit ไว้ด้วยการเรียกฟังก์ชัน reveal
-    - ใส่ค่า random number ที่ commit ไว้ลงใน _commit
+    - ใส่ค่า random number ที่เลือกไว้ลงใน _commit
     - ใส่ค่า _salt ให้ตรงกันกับที่ใส่ใน Stage 1
 
     <i style="color:gray">เมื่อผ่านไป T2 วินาทีหลังจากเข้าสู่ Stage 2 เกมจะเข้าสู่ Stage 3
@@ -27,6 +30,6 @@
 
     <i style="color:gray">เมื่อผ่านไป T3 วินาทีหลังจากเข้าสู่ Stage 3 หากเจ้าของ contract ไม่เรียกฟังก์ชัน drawWinner ก็จะไม่สามารถเรียกได้อีก และเกมจะเข้าสู่ Stage 4 </i> 
 
-4. Stage 4: ผู้เล่นที่ทำตามกติกาสามารถถอนเงินเดิมพันของตัวเองออกไปได้โดยเรียกฟังก์ชัน refund 
+4. Stage 4: ผู้เล่นทุกคนสามารถถอนเงินเดิมพันของตัวเองออกไปได้โดยเรียกฟังก์ชัน refund 
 
 *หากเจ้าของ contract ต้องการ reset state ใน contract สำหรับการเล่นรอบใหม่ สามารถเรียกใช้ฟังก์ชัน resetState ได้ แต่จะต้องไม่มีเงินใน contract เหลืออยู่จึงจะ reset state ได้

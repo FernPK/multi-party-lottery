@@ -48,14 +48,14 @@ contract Lottery {
         winner = _maxNumPlayer; // no winner
     }
 
-    function joinAndCommit(uint _commit, uint _salt) external payable {
+    function joinAndCommit(uint _commitHash) external payable {
         require(numPlayer < maxNumPlayer, "Party is full");
         require(startTime == 0 || block.timestamp <= startTime + T1, "Not in participation period");
         require(player[msg.sender].commit == 0, "You are now a player");
         require(msg.value == 0.001 ether, "Please send 0.001 ether");
         numPlayer++;
         totalValue += msg.value;
-        player[msg.sender].commit = uint(keccak256(abi.encodePacked(msg.sender, _commit, _salt)));
+        player[msg.sender].commit = _commitHash;
         player[msg.sender].revealed = false;
         player[msg.sender].beCandidate = false;
         allPlayer.push(msg.sender);
@@ -68,7 +68,7 @@ contract Lottery {
         require(startTime != 0 && block.timestamp > startTime + T1 && block.timestamp <= startTime + T1 + T2, "Not in number revealing period");
         require(player[msg.sender].commit != 0, "You are not a player");
         require(_commit >= 0 && _commit <= 999, "Random number must in range 0-999. You didn't follow the rule");
-        require(uint(keccak256(abi.encodePacked(msg.sender, _commit, _salt))) == player[msg.sender].commit, "Revealed hash does not match commit");
+        require(getHash( _commit, _salt) == player[msg.sender].commit, "Revealed hash does not match commit");
         require(player[msg.sender].revealed == false, "Already revealed");
         player[msg.sender].revealed = true;
         candidate[numCandidate].randomNum = _commit;
@@ -100,7 +100,6 @@ contract Lottery {
         require(totalValue > 0, "Cannot be refunded");
         require(startTime != 0 && block.timestamp > startTime + T1 + T2 + T3, "Not in refund period");
         require(player[msg.sender].commit != 0, "You have received your refund");
-        require(player[msg.sender].beCandidate == true, "You didn't follow the rules");
         totalValue -= 0.001 ether;
         player[msg.sender].commit = 0;
         payable(msg.sender).transfer(0.001 ether);
@@ -120,5 +119,9 @@ contract Lottery {
         xorRandomNum = 0;
         winner = maxNumPlayer;
         delete allPlayer;
+    }
+
+    function getHash(uint _commit, uint _salt) public view returns(uint){
+        return uint(keccak256(abi.encodePacked(msg.sender, _commit, _salt)));
     }
 }
