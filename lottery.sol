@@ -77,7 +77,7 @@ contract Lottery {
         player[msg.sender].beCandidate = true;
     }
 
-    function drawWinner() external isOwner {
+    function drawWinner() external {
         require(startTime != 0 && block.timestamp > startTime + T1 + T2 && block.timestamp <= startTime + T1 + T2 + T3, "Not in winner drawing period");
         require(totalValue > 0, "drawWinner can be called only once");
         if (numCandidate > 0) {
@@ -88,9 +88,14 @@ contract Lottery {
             uint256 prize = 0.001 ether * numCandidate * 98 / 100;
             payable(candidate[winner].addr).transfer(prize);
             totalValue -= prize;
+            totalValue = totalValue / 2;
             payable(owner).transfer(totalValue);
+            payable(msg.sender).transfer(totalValue);
         }
         else if (numCandidate == 0) {
+            uint256 payOff = totalValue * 1 / 100;
+            totalValue -= payOff;
+            payable(msg.sender).transfer(payOff);
             payable(owner).transfer(totalValue);
         }
         totalValue = 0;
